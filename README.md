@@ -18,8 +18,36 @@ rules:
     - 'DOMAIN,mypikpak.net,[机场名]'
     - 'DOMAIN,user.mypikpak.com,[机场名]'
     - 'DOMAIN,access.mypikpak.com,[机场名]'
+    - 'DOMAIN,api-drive.mypikpak.com,[机场名]'
+    - 'DOMAIN-KEYWORD,dl-a10b-,DIRECT'
+    - 'DOMAIN-KEYWORD,dl-z01a-,DIRECT'
+    - 'DOMAIN-KEYWORD,dl-b07-,DIRECT'
+```
+
+经[@AKiSA07](https://github.com/AKiSA07)在[issue](https://github.com/jdysya/pikpakHelpr-plus/issues/4)中提醒：
+
+建议将原规则的最后两行
+
+```
     - 'DOMAIN,api-drive.mypikpak.com,DIRECT'
     - 'DOMAIN-KEYWORD,dl-a10b-,DIRECT'
+```
+
+更新为
+
+```
+    - 'DOMAIN,api-drive.mypikpak.com,[机场名]'
+    - 'DOMAIN-KEYWORD,dl-a10b-,DIRECT'
+    - 'DOMAIN-KEYWORD,dl-z01a-,DIRECT'
+    - 'DOMAIN-KEYWORD,dl-b07-,DIRECT'
+```
+
+可解决文件转存失败的问题，以及新增了部分直链下载域名关键词
+
+如果代理软件支持正则，则推荐
+
+```
+/dl-(?:a10b|z01a|b07)-/
 ```
 
 
