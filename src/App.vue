@@ -1,7 +1,7 @@
 <script setup>
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import {ref} from "vue";
+import { ref } from "vue";
 import AriaDownloadDialog from "./components/AriaDownloadDialog.vue";
 import AriaConfigDialog from "./components/AriaConfigDialog.vue"
 import Aria2Toast from './components/Aria2Toast.vue'
@@ -17,7 +17,7 @@ const showToast = (val) => {
   toastRef.value.open()
 }
 
-if(location.pathname !== '/') {
+if (location.pathname !== '/') {
   showPlugin.value = true
 }
 
@@ -25,12 +25,12 @@ if(location.pathname !== '/') {
 
 <template>
   <ul class="btns" v-if="showPlugin">
-  <li class="btn" @click="downloadShow = true">aria2下载</li>
-  <li class="btn" @click="configShow = true">aria2配置</li>
+    <li class="btn" @click="downloadShow = true">aria2下载</li>
+    <li class="btn" @click="configShow = true">aria2配置</li>
   </ul>
   <AriaDownloadDialog @msg="showToast" v-model:show="downloadShow"></AriaDownloadDialog>
   <AriaConfigDialog @msg="showToast" v-model:show="configShow"></AriaConfigDialog>
-  <Aria2Toast ref="toastRef">{{tip}}</Aria2Toast>
+  <Aria2Toast ref="toastRef">{{ tip }}</Aria2Toast>
 </template>
 
 <style scoped>
@@ -40,8 +40,18 @@ if(location.pathname !== '/') {
   padding-right: 10px;
   padding-top: 20px;
 }
+
 .btns li {
   cursor: pointer;
   margin-right: 10px;
+  padding: 8px 15px;
+  background-color: #409eff;
+  color: white;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.btns li:hover {
+  background-color: #66b1ff;
 }
 </style>
