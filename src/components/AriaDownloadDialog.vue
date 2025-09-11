@@ -61,7 +61,7 @@ watch(
       emits('msg', '开始加载文件列表，请稍等')
       getList(parent_id).then(res => {
         res.files.forEach(item => {
-          tempList.push({ id: item.id, name: item.name, type: item.kind, created_time: item.created_time, modified_time: item.modified_time,size: item.size,file_category: item.file_category })
+          tempList.push({ id: item.id, name: item.name, type: item.kind, created_time: item.created_time, modified_time: item.modified_time, size: item.size, file_category: item.file_category })
         })
         list.value = tempList
         sortList(); // Apply default sort after loading
@@ -126,15 +126,15 @@ const sortList = () => {
 };
 
 const formatBytes = (bytes, decimals = 2) => {
-    if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return '0 Bytes';
 
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 const formatFileInfo = (item) => {
@@ -269,15 +269,17 @@ const push = async () => {
       }
       ariaToken && (ariaData.params.unshift(`token:${ariaToken}`))
       pushToAria(ariaHost, ariaData).then((ariares) => {
-        if (ariares.result) {
+        let resoj = JSON.parse(ariares)
+        if (resoj.result) {
           success++
         } else {
-          console.log(ariares);
+          console.log(resoj);
           console.log(ariaData);
-          errorMSG = ariares.error.message === 'Unauthorized' ? '密钥不对' : '推送失败'
+          errorMSG = resoj.error.message === 'Unauthorized' ? '密钥不对' : '推送失败'
           fail++
         }
       }).catch((e) => {
+        console.warn(e);
         console.log(ariares);
         console.log(ariaData);
         errorMSG = `${e.statusText} 请检测配置`
@@ -286,8 +288,8 @@ const push = async () => {
       }).finally(() => {
         total--
         if (total === 0) {
-          emits('msg', `成功：${success} 失败: ${fail} ${fail !== 0 ? '失败原因' + errorMSG : ''}`)
-          console.info(`成功：${success} 失败: ${fail} ${fail !== 0 ? '失败原因' + errorMSG : ''}`);
+          emits('msg', `成功：${success} 失败: ${fail} ${fail !== 0 ? '失败原因：' + errorMSG : ''}`)
+          console.info(`成功：${success} 失败: ${fail} ${fail !== 0 ? '失败原因：' + errorMSG : ''}`);
           if (retryList.length > 0) {
             console.log(retryList);
             emits('msg', `即将重试${retryList.length}个项目`)
