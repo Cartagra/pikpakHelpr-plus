@@ -5,6 +5,7 @@ import { ref } from "vue";
 import AriaDownloadDialog from "./components/AriaDownloadDialog.vue";
 import AriaConfigDialog from "./components/AriaConfigDialog.vue"
 import Aria2Toast from './components/Aria2Toast.vue'
+import FloatingWindow from './components/FloatingWindow.vue'
 
 const downloadShow = ref(false) // 下载
 const configShow = ref(false) // 配置
@@ -24,34 +25,24 @@ if (location.pathname !== '/') {
 </script>
 
 <template>
-  <ul class="btns" v-if="showPlugin">
-    <li class="btn" @click="downloadShow = true">aria2下载</li>
-    <li class="btn" @click="configShow = true">aria2配置</li>
-  </ul>
-  <AriaDownloadDialog @msg="showToast" v-model:show="downloadShow"></AriaDownloadDialog>
-  <AriaConfigDialog @msg="showToast" v-model:show="configShow"></AriaConfigDialog>
+  <FloatingWindow 
+      v-if="showPlugin" 
+      @download="downloadShow = true" 
+    />
+  <AriaDownloadDialog 
+      :show="downloadShow" 
+      @close="downloadShow = false"
+      @openConfig="configShow = true"
+      @msg="showToast"
+    />
+  <AriaConfigDialog 
+      :show="configShow" 
+      @close="configShow = false"
+      @msg="showToast"
+    />
   <Aria2Toast ref="toastRef">{{ tip }}</Aria2Toast>
 </template>
 
 <style scoped>
-.btns {
-  display: flex;
-  flex-direction: row-reverse;
-  padding-right: 10px;
-  padding-top: 20px;
-}
-
-.btns li {
-  cursor: pointer;
-  margin-right: 10px;
-  padding: 8px 15px;
-  background-color: #409eff;
-  color: white;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-.btns li:hover {
-  background-color: #66b1ff;
-}
+/* 悬浮窗组件的样式已在FloatingWindow.vue中定义 */
 </style>

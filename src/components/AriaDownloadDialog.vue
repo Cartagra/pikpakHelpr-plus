@@ -30,20 +30,33 @@
         <span class="file-info">{{ formatFileInfo(item) }}</span>
       </li>
     </ul>
+    
+    <!-- aria2连接状态显示 -->
+    <div class="connection-status">
+      <div class="status-indicator">
+        <div class="status-dot" :class="connectionStatus.class"></div>
+        <span class="status-text">{{ connectionStatus.text }}</span>
+      </div>
+      <button class="test-btn" @click="testConnection" :disabled="isTestingConnection">
+        {{ isTestingConnection ? '测试中...' : '测试连接' }}
+      </button>
+    </div>
+    
     <div class="footer">
+      <div class="btn el-button el-button--secondary" @click="openConfig">配置aria2</div>
       <div class="btn el-button el-button--primary" @click="pushBefore">推送到aria2</div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { getDownload, pushToAria, getList } from '../api'
 
 const props = defineProps({
   show: Boolean
 })
-const emits = defineEmits(['update:show', 'msg'])
+const emits = defineEmits(['close', 'msg', 'openConfig'])
 
 const list = ref([])
 const selected = ref([])
@@ -53,6 +66,24 @@ const isForbidden = ref(false) // 按钮是否禁用，防抖
 
 const sortBy = ref('name') // Default sort by name
 const sortDirection = ref('asc') // Default sort direction
+
+// aria2连接状态管理
+const connectionState = ref('unknown') // 'unknown', 'connected', 'disconnected', 'testing'
+const isTestingConnection = ref(false)
+
+// 连接状态计算属性
+const connectionStatus = computed(() => {
+  switch (connectionState.value) {
+    case 'connected':
+      return { class: 'connected', text: 'Aria2连接正常' }
+    case 'disconnected':
+      return { class: 'disconnected', text: 'Aria2连接失败' }
+    case 'testing':
+      return { class: 'testing', text: '正在测试连接...' }
+    default:
+      return { class: 'unknown', text: 'Aria2连接状态未知' }
+  }
+})
 
 watch(
   () => props.show,
@@ -71,6 +102,11 @@ watch(
       }).finally(() => {
         emits('msg', '文件列表加载完成', 'success')
       })
+      
+      // 对话框打开时检测aria2连接状态
+      setTimeout(() => {
+        testConnection()
+      }, 500)
     }
   }
 )
@@ -80,8 +116,59 @@ const close = () => {
   selected.value = []
   checkedAll.value = false
   isForbidden.value = false
-  emits('update:show', false)
+  emits('close')
 }
+
+const openConfig = () => {
+  emits('openConfig')
+}
+
+// 测试aria2连接
+const testConnection = async () => {
+  if (isTestingConnection.value) return
+  
+  isTestingConnection.value = true
+  connectionState.value = 'testing'
+  
+  try {
+    const host = window.localStorage.getItem('ariaHost') || ''
+    const token = window.localStorage.getItem('ariaToken') || ''
+    
+    if (!host) {
+      throw new Error('请先配置Aria2 RPC地址')
+    }
+    
+    // 使用aria2.getVersion方法测试连接
+    const payload = {
+      jsonrpc: '2.0',
+      method: 'aria2.getVersion',
+      id: 1,
+      params: token ? [`token:${token}`] : []
+    }
+    
+    const response = await pushToAria(host, payload)
+    if (response && response.result) {
+      connectionState.value = 'connected'
+      emits('msg', 'Aria2连接测试成功', 'success')
+    } else {
+      connectionState.value = 'disconnected'
+      emits('msg', 'Aria2连接失败，请检查配置', 'error')
+    }
+  } catch (error) {
+    connectionState.value = 'disconnected'
+    emits('msg', `Aria2连接测试失败: ${error.message}`, 'error')
+  } finally {
+    isTestingConnection.value = false
+  }
+}
+
+// 组件挂载时检查连接
+onMounted(() => {
+  // 延迟检查连接，避免与文件列表加载冲突
+  setTimeout(() => {
+    testConnection()
+  }, 1000)
+})
 
 // 选择
 const onCheckAll = () => {
@@ -589,25 +676,46 @@ const push = async () => {
 .footer {
   margin-top: 24px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
   padding-top: 20px;
   border-top: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+@media (max-width: 480px) {
+  .footer {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 
 /* 现代化按钮样式 */
 .btn.el-button {
   padding: 14px 28px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  color: white;
   border: none;
   border-radius: 12px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
   position: relative;
   overflow: hidden;
+}
+
+/* 主要按钮样式 */
+.btn.el-button--primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+}
+
+/* 次要按钮样式 */
+.btn.el-button--secondary {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #475569;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 2px 8px 0 rgba(71, 85, 105, 0.1);
 }
 
 .btn.el-button::before {
@@ -621,9 +729,16 @@ const push = async () => {
   transition: left 0.5s;
 }
 
-.btn.el-button:hover {
+.btn.el-button--primary:hover {
   background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
   box-shadow: 0 8px 25px 0 rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn.el-button--secondary:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px 0 rgba(71, 85, 105, 0.15);
   transform: translateY(-2px);
 }
 
@@ -641,6 +756,94 @@ const push = async () => {
     width: 100%;
     padding: 16px;
     font-size: 18px;
+  }
+}
+
+/* aria2连接状态样式 */
+.connection-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 16px 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.status-dot.connected {
+  background: #52c41a;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+  animation: pulse 2s infinite;
+}
+
+.status-dot.disconnected {
+  background: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+.status-dot.testing {
+  background: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  animation: pulse 1s infinite;
+}
+
+.status-dot.unknown {
+  background: #d9d9d9;
+}
+
+.status-text {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.test-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.test-btn:hover:not(:disabled) {
+  border-color: #409eff;
+  color: #409eff;
+}
+
+.test-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 </style>
