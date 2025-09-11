@@ -10,9 +10,11 @@
 
 ## 代理相关
 
-pikpak的下载链接并没有被墙，所以并不需要走代理，这样可以大量节省机场的流量，分享一下我的clash配置如下（建议将aria2的的http代理设置为代理软件的端口，如`http://127.0.0.1:7890`，否则配置可能不会生效，具体请自行测试）：
+建议将aria2的的http代理设置为代理软件的端口，如`http://127.0.0.1:7890`，否则可能下载没有速度
 
-```
+下列clash配置请自行测试，若可正常下载则说明下载链接被没有被墙，此时下载不会消耗机场流量。若无法下载请不要使用下列配置。
+
+```yml
 rules:
     - 'DOMAIN,mypikpak.com,[机场名]'
     - 'DOMAIN,mypikpak.net,[机场名]'
@@ -23,34 +25,6 @@ rules:
     - 'DOMAIN-KEYWORD,dl-z01a-,DIRECT'
     - 'DOMAIN-KEYWORD,dl-b07-,DIRECT'
 ```
-
-经[@AKiSA07](https://github.com/AKiSA07)在[issue](https://github.com/jdysya/pikpakHelpr-plus/issues/4)中提醒：
-
-建议将原规则的最后两行
-
-```
-    - 'DOMAIN,api-drive.mypikpak.com,DIRECT'
-    - 'DOMAIN-KEYWORD,dl-a10b-,DIRECT'
-```
-
-更新为
-
-```
-    - 'DOMAIN,api-drive.mypikpak.com,[机场名]'
-    - 'DOMAIN-KEYWORD,dl-a10b-,DIRECT'
-    - 'DOMAIN-KEYWORD,dl-z01a-,DIRECT'
-    - 'DOMAIN-KEYWORD,dl-b07-,DIRECT'
-```
-
-可解决文件转存失败的问题，以及新增了部分直链下载域名关键词
-
-如果代理软件支持正则，则推荐
-
-```
-/dl-(?:a10b|z01a|b07)-/
-```
-
-
 
 ### 配置
 安装后刷新在新建按钮旁边会出现一个aria2配置按钮，点击配置

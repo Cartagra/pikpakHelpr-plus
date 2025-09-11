@@ -3,7 +3,10 @@
     <h2>请勾选你要下载的</h2>
     <div class="close" @click="close">×</div>
     <div class="toolbar">
-      <input @change="onCheckAll" style="margin: 10px 10px 0 0" type="checkbox" id="checkbox" v-model="checkedAll">全选
+      <label for="checkbox">
+        <input @change="onCheckAll" type="checkbox" id="checkbox" v-model="checkedAll">
+        全选
+      </label>
       <div class="sort-options">
         <label for="sort-by">排序方式:</label>
         <select id="sort-by" v-model="sortBy" @change="sortList">
@@ -323,95 +326,236 @@ const push = async () => {
 </script>
 
 <style scoped>
+/* 现代化对话框样式 */
 .dialog {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   z-index: 10000;
-  padding: 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  width: 90%;
-  max-width: 700px;
+  padding: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  width: 90vw;
+  max-width: 800px;
+  min-width: 320px;
+  max-height: 90vh;
   box-sizing: border-box;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: dialogFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .dialog {
+    width: 95vw;
+    padding: 24px;
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dialog {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    padding: 20px;
+  }
+}
+
+/* 标题样式 */
 .dialog h2 {
   text-align: center;
-  color: #333;
-  margin-bottom: 20px;
+  color: #1e293b;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+@media (max-width: 480px) {
+  .dialog h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+/* 关闭按钮 */
 .dialog .close {
   position: absolute;
-  right: 15px;
-  top: 15px;
-  font-size: 30px;
+  right: 20px;
+  top: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
   cursor: pointer;
-  color: #999;
-  transition: color 0.3s ease;
+  color: #64748b;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .dialog .close:hover {
-  color: #666;
+  color: #ef4444;
+  background: rgba(254, 226, 226, 0.8);
+  border-color: rgba(248, 113, 113, 0.3);
+  transform: scale(1.05);
 }
 
+/* 工具栏样式 */
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
 }
 
 .toolbar input[type="checkbox"] {
   margin-right: 8px;
-  transform: scale(1.2);
+  transform: scale(1.3);
+  accent-color: #6366f1;
 }
 
-.sort-options button {
-  margin-left: 10px;
-  padding: 8px 15px;
-  border: 1px solid #dcdfe6;
-  background-color: #f4f4f5;
-  color: #606266;
+.toolbar label {
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  transition: color 0.2s ease;
 }
 
-.sort-options button:hover {
-  background-color: #e9e9eb;
-  border-color: #d3d4d6;
-  color: #303133;
+.toolbar label:hover {
+  color: #6366f1;
 }
 
+/* 排序选项 */
+.sort-options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .sort-options {
+    justify-content: center;
+  }
+}
+
+.sort-options label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.sort-options select {
+  padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.sort-options select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.sort-options select:hover {
+  border-color: #9ca3af;
+}
+
+/* 文件列表容器 */
 .movies {
-  margin-top: 10px;
+  margin-top: 16px;
   height: 400px;
   overflow-y: auto;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  padding: 10px;
-  background-color: #fdfdfd;
+  border: 2px solid #f1f5f9;
+  border-radius: 16px;
+  padding: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
+@media (max-width: 480px) {
+  .movies {
+    height: 300px;
+  }
+}
+
+/* 自定义滚动条 */
+.movies::-webkit-scrollbar {
+  width: 8px;
+}
+
+.movies::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.movies::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.movies::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+/* 文件列表项 */
 .movies li {
   display: flex;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px dashed #f0f0f0;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
   font-size: 14px;
-  color: #303133;
+  color: #334155;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
-.movies li .file-info {
-  margin-left: auto;
-  color: #606266;
-  font-size: 12px;
+.movies li:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  transform: translateX(4px);
 }
 
 .movies li:last-child {
@@ -419,33 +563,84 @@ const push = async () => {
 }
 
 .movies li input[type="checkbox"] {
-  margin-right: 10px;
-  transform: scale(1.1);
+  margin-right: 16px;
+  transform: scale(1.2);
+  accent-color: #6366f1;
 }
 
 .movies li .icon {
-  margin-right: 8px;
-  font-size: 1.2em;
+  margin-right: 12px;
+  font-size: 1.5em;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
+.movies li .file-info {
+  margin-left: auto;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 6px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+/* 底部操作区 */
 .footer {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
-  flex-direction: row-reverse;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
 }
 
+/* 现代化按钮样式 */
 .btn.el-button {
-  padding: 10px 20px;
-  background-color: #409eff;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s ease;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn.el-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
 .btn.el-button:hover {
-  background-color: #66b1ff;
+  background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+  box-shadow: 0 8px 25px 0 rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn.el-button:hover::before {
+  left: 100%;
+}
+
+.btn.el-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+}
+
+@media (max-width: 480px) {
+  .btn.el-button {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+  }
 }
 </style>
