@@ -1,3 +1,8 @@
+## 界面
+
+![alt text](assets/image1.webp) 
+![alt text](assets/image2.webp)
+
 ## 说明
 本项目改进于： https://github.com/xiaoziguys/pikpakHelpr
 
@@ -7,6 +12,8 @@
 3. 支持了文件夹的下载
 
 安装地址：https://greasyfork.org/zh-CN/scripts/503530-pikpak%E5%8A%A9%E6%89%8Bplus
+
+加载脚本后在Pikpak网页右中处会显示一个可拖拽的悬浮按钮，点击即可使用。
 
 ## 代理相关
 
