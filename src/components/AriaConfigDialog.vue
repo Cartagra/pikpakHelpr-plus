@@ -74,13 +74,13 @@ const save = async () => {
     }
     const response = await pushToAria(rpcUrl, payload)
     if (response && response.result) {
-      emits('msg', '保存成功！Aria2连接成功！')
+      emits('msg', '保存成功！Aria2连接成功！', 'success')
     } else {
-      emits('msg', '保存成功！但Aria2连接失败，请检查配置。')
+      emits('msg', '保存成功！但Aria2连接失败，请检查配置。', 'warning')
     }
   } catch (error) {
     console.error('Aria2连接测试失败:', error)
-    emits('msg', '保存成功！但Aria2连接失败，请检查配置。')
+    emits('msg', '保存成功！但Aria2连接失败，请检查配置。', 'warning')
   }
 }
 </script>

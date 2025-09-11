@@ -12,9 +12,9 @@ const tip = ref('') // 提示
 const toastRef = ref(null)
 const showPlugin = ref(false)
 
-const showToast = (val) => {
+const showToast = (val, type = 'info') => {
   tip.value = val
-  toastRef.value.open()
+  toastRef.value.open(type)
 }
 
 if (location.pathname !== '/') {

@@ -58,13 +58,15 @@ watch(
       const tempList = []
       let parent_id = window.location.href.split('/').pop()
       if (parent_id == 'all') parent_id = ''
-      emits('msg', '开始加载文件列表，请稍等')
+      emits('msg', '开始加载文件列表，请稍等', 'info')
       getList(parent_id).then(res => {
         res.files.forEach(item => {
           tempList.push({ id: item.id, name: item.name, type: item.kind, created_time: item.created_time, modified_time: item.modified_time, size: item.size, file_category: item.file_category })
         })
         list.value = tempList
         sortList(); // Apply default sort after loading
+      }).finally(() => {
+        emits('msg', '文件列表加载完成', 'success')
       })
     }
   }
@@ -163,7 +165,7 @@ const updateSelectedIndices = () => {
 };
 
 const getAllList = async () => {
-  emits('msg', '开始获取文件内容');
+  emits('msg', '开始获取文件内容', 'info');
   const initialSelectedItems = [];
   for (const index of selected.value) {
     initialSelectedItems.push(list.value[index]);
@@ -187,7 +189,7 @@ const getAllList = async () => {
   while (foldersToProcess.length > 0) {
     const currentFolder = foldersToProcess.shift(); // Get a folder to process
     processedCount++;
-    emits('msg', `正在扫描第 ${processedCount} 个文件夹: ${currentFolder.name}`);
+    emits('msg', `正在扫描第 ${processedCount} 个文件夹: ${currentFolder.name}`, 'info');
     try {
       const result = await getList(currentFolder.id);
       if (result.files) {
@@ -200,13 +202,13 @@ const getAllList = async () => {
         }
       }
     } catch (e) {
-      emits('msg', `获取文件夹 ${currentFolder.name} 内容失败`);
+      emits('msg', `获取文件夹 ${currentFolder.name} 内容失败`, 'error');
       console.error(e);
     }
   }
 
   selectedItems.value = allFiles;
-  emits('msg', `文件获取完毕，共${allFiles.length}个文件。`);
+  emits('msg', `文件获取完毕，共${allFiles.length}个文件。`, 'success');
 }
 
 const pushBefore = async () => {
@@ -215,7 +217,7 @@ const pushBefore = async () => {
     await getAllList()
     push()
   } else {
-    emits('msg', '已经开始推送了')
+    emits('msg', '已经开始推送了', 'warning')
   }
 
 }
@@ -232,7 +234,7 @@ const push = async () => {
   let errorMSG = ''
   let retryList = [] // 重试列表
   if (!ariaHost) {
-    emits('msg', '请先配置aria2')
+    emits('msg', '请先配置aria2', 'error')
     close()
     return
   }
@@ -242,10 +244,10 @@ const push = async () => {
     getDownload(item.id).then((res) => {
 
       if (res.error_description) {
-        emits('msg', `失败原因: ${res.error_description} 请刷新！`)
+        emits('msg', `失败原因: ${res.error_description} 请刷新！`, 'error')
         return
       }
-      emits('msg', `第${testIndex + 1}个项目下载链接获取成功`)
+      emits('msg', `第${testIndex + 1}个项目下载链接获取成功`, 'success')
       console.log(`第${testIndex + 1}个项目下载链接获取成功`);
       let ariaData = {
         id: new Date().getTime(),
@@ -269,7 +271,11 @@ const push = async () => {
       }
       ariaToken && (ariaData.params.unshift(`token:${ariaToken}`))
       pushToAria(ariaHost, ariaData).then((ariares) => {
-        let resoj = JSON.parse(ariares)
+        let resoj = ariares
+        // 失败时ariares为字符串类型，将其转为对象
+        if(typeof ariares === 'string'){
+          resoj = JSON.parse(ariares)
+        }
         if (resoj.result) {
           success++
         } else {
@@ -283,16 +289,17 @@ const push = async () => {
         console.log(ariares);
         console.log(ariaData);
         errorMSG = `${e.statusText} 请检测配置`
-        emits('msg', `失败原因: ${e.statusText}`)
+        emits('msg', `失败原因: ${e.statusText}`, 'error')
         fail++
       }).finally(() => {
         total--
         if (total === 0) {
-          emits('msg', `成功：${success} 失败: ${fail} ${fail !== 0 ? '失败原因：' + errorMSG : ''}`)
+          const resultType = fail === 0 ? 'success' : (success === 0 ? 'error' : 'warning')
+          emits('msg', `成功：${success} 失败: ${fail} ${fail !== 0 ? '失败原因：' + errorMSG : ''}`, resultType)
           console.info(`成功：${success} 失败: ${fail} ${fail !== 0 ? '失败原因：' + errorMSG : ''}`);
           if (retryList.length > 0) {
             console.log(retryList);
-            emits('msg', `即将重试${retryList.length}个项目`)
+            emits('msg', `即将重试${retryList.length}个项目`, 'warning')
             console.log(`即将重试${retryList.length}个项目`)
             selectedItems.value = retryList
             retryList = [] // 清空重试列表
