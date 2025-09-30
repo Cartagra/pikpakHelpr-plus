@@ -46,7 +46,11 @@ defineExpose({ open })
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-size: 14px;
-  z-index: 9999;
+  /* 修复：macOS m1上toast不显示在最上层的问题
+    问题根源：AiraConfigDialog.vue和AriaDownloadDialog.vue中
+    .dialog类样式下"z-index"值均设置为10000
+  */
+  z-index: 10001;
   min-width: 300px;
   text-align: center;
   display: flex;
