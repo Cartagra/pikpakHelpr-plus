@@ -787,6 +787,32 @@ const push = async () => {
   }
 }
 
+/* 新增：修复移动端显示器顶部工具栏布局问题 */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column; /* 工具栏整体改为垂直布局 */
+    gap: 12px;
+    align-items: stretch; /* 子元素拉伸填充宽度 */
+  }
+
+  .sort-options {
+    display: flex;
+    flex-direction: column; /* 关键：排序选项垂直排列 */
+    gap: 8px; /* 增加垂直间距 */
+    width: 100%; /* 确保充分利用可用宽度 */
+  }
+
+  .sort-options label[for="sort-by"] {
+    margin-bottom: 4px; /* 给"排序方式"标签一点下边距 */
+    font-size: 14px; /* 可选：调整字体大小适应小屏幕 */
+  }
+
+  .sort-options select {
+    width: 100%; /* 下拉框宽度填满容器 */
+    box-sizing: border-box; /* 确保padding和border包含在宽度内 */
+  }
+}
+
 /* aria2连接状态样式 */
 .connection-status {
   display: flex;
