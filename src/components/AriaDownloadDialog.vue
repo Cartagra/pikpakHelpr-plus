@@ -432,6 +432,12 @@ const push = async () => {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   animation: dialogFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 修改对话框样式 */
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden; /* 防止整个对话框滚动 */
 }
 
 @keyframes dialogFadeIn {
@@ -517,7 +523,11 @@ const push = async () => {
   align-items: center;
   margin-bottom: 20px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.05) 0%,
+    rgba(168, 85, 247, 0.05) 100%
+  );
   border-radius: 12px;
   border: 1px solid rgba(99, 102, 241, 0.1);
 }
@@ -593,7 +603,12 @@ const push = async () => {
 /* 文件列表容器 */
 .movies {
   margin-top: 16px;
-  height: 400px;
+
+  /* 修改文件列表容器 */
+  flex: 1; /* 关键修改：占据剩余空间 */
+  min-height: 200px; /* 最小高度保障 */
+  /* height: 400px; */
+
   overflow-y: auto;
   border: 2px solid #f1f5f9;
   border-radius: 16px;
@@ -641,7 +656,11 @@ const push = async () => {
 }
 
 .movies li:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.05) 0%,
+    rgba(168, 85, 247, 0.05) 100%
+  );
   transform: translateX(4px);
 }
 
@@ -674,19 +693,28 @@ const push = async () => {
 
 /* 底部操作区 */
 .footer {
-  margin-top: 24px;
+  /* margin-top: 24px; */
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
   padding-top: 20px;
   border-top: 1px solid rgba(226, 232, 240, 0.6);
+
+  /* 确保底部区域始终可见 */
+  flex-shrink: 0; /* 防止被压缩 */
+  margin-top: auto; /* 自动推到底部 */
 }
 
 @media (max-width: 480px) {
+  .movies {
+    min-height: 150px; /* 移动端适当减小最小高度 */
+  }
+
   .footer {
     flex-direction: column;
     gap: 12px;
+    padding: 16px 0 0;
   }
 }
 
