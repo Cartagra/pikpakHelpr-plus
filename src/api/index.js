@@ -90,7 +90,7 @@ function getHeader(){
   }
 }
 
-export function getList(parent_id){
+export async function getList(parent_id){
   let url;
   if (parent_id === "recent") {
       url = `https://api-drive.mypikpak.com/drive/v1/events?thumbnail_size=SIZE_MEDIUM&limit=100`;
