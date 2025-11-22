@@ -1,42 +1,45 @@
 <template>
-  <div style="width: 400px" v-if="show" class="dialog">
-    <h2>请配置你的aria2</h2>
-    <div class="close" @click="close">×</div>
-    
-    <!-- 连接状态显示 -->
-    <div class="connection-status">
-      <div class="status-indicator">
-        <div class="status-dot" :class="connectionStatus.class"></div>
-        <span class="status-text">{{ connectionStatus.text }}</span>
+  <div v-if="show">
+    <div class="dialog-overlay" @click="close"></div>
+    <div style="width: 400px" class="dialog">
+      <h2>请配置你的aria2</h2>
+      <div class="close" @click="close">×</div>
+      
+      <!-- 连接状态显示 -->
+      <div class="connection-status">
+        <div class="status-indicator">
+          <div class="status-dot" :class="connectionStatus.class"></div>
+          <span class="status-text">{{ connectionStatus.text }}</span>
+        </div>
+        <button class="test-btn" @click="testConnection" :disabled="isTestingConnection">
+          {{ isTestingConnection ? '测试中...' : '测试连接' }}
+        </button>
       </div>
-      <button class="test-btn" @click="testConnection" :disabled="isTestingConnection">
-        {{ isTestingConnection ? '测试中...' : '测试连接' }}
-      </button>
-    </div>
-    <ul class="config-list">
-      <li>
-        <div class="label">RPC地址</div>
-        <input v-model="form.host" type="text" placeholder="http://127.0.0.1:6800/jsonrpc">
-        <p class="guidance">Aria2 RPC服务的地址，通常是 `http://127.0.0.1:6800/jsonrpc`。如果你在Docker中运行，可能需要使用宿主机的IP地址。</p>
-      </li>
-      <li>
-        <div class="label">RPC密钥</div>
-        <input v-model="form.token" type="text" placeholder="没有请留空">
-        <p class="guidance">Aria2 RPC的密钥，如果你在Aria2配置中设置了 `rpc-secret`，请在此填写。如果没有设置，请留空。</p>
-      </li>
-      <li>
-        <div class="label">下载路径</div>
-        <input v-model="form.path" type="text" placeholder="C:/Users/admin/Downloads/">
-        <p class="guidance">文件在服务器上的保存路径。例如：`/downloads/` (Linux) 或 `D:\Downloads` (Windows)\。请确保Aria2有写入该目录的权限。</p>
-      </li>
-      <li>
-        <div class="label">其他参数</div>
-        <input v-model="form.params" type="text" placeholder="user-agent=xxx;header=xxx">
-        <p class="guidance">Aria2的额外参数，以分号 `;` 分隔，例如 `user-agent=Mozilla;split=10`。这些参数会直接传递给Aria2。</p>
-      </li>
-    </ul>
-    <div class="footer">
-      <div class="btn el-button el-button--primary" @click="save">保存</div>
+      <ul class="config-list">
+        <li>
+          <div class="label">RPC地址</div>
+          <input v-model="form.host" type="text" placeholder="http://127.0.0.1:6800/jsonrpc">
+          <p class="guidance">Aria2 RPC服务的地址，通常是 `http://127.0.0.1:6800/jsonrpc`。如果你在Docker中运行，可能需要使用宿主机的IP地址。</p>
+        </li>
+        <li>
+          <div class="label">RPC密钥</div>
+          <input v-model="form.token" type="text" placeholder="没有请留空">
+          <p class="guidance">Aria2 RPC的密钥，如果你在Aria2配置中设置了 `rpc-secret`，请在此填写。如果没有设置，请留空。</p>
+        </li>
+        <li>
+          <div class="label">下载路径</div>
+          <input v-model="form.path" type="text" placeholder="C:/Users/admin/Downloads/">
+          <p class="guidance">文件在服务器上的保存路径。例如：`/downloads/` (Linux) 或 `D:\Downloads` (Windows)\。请确保Aria2有写入该目录的权限。</p>
+        </li>
+        <li>
+          <div class="label">其他参数</div>
+          <input v-model="form.params" type="text" placeholder="user-agent=xxx;header=xxx">
+          <p class="guidance">Aria2的额外参数，以分号 `;` 分隔，例如 `user-agent=Mozilla;split=10`。这些参数会直接传递给Aria2。</p>
+        </li>
+      </ul>
+      <div class="footer">
+        <div class="btn el-button el-button--primary" @click="save">保存</div>
+      </div>
     </div>
   </div>
 </template>
@@ -101,7 +104,7 @@ const testConnection = async () => {
     const response = await pushToAria(rpcUrl, payload)
     if (response && response.result) {
       connectionState.value = 'connected'
-      emits('msg', `Aria2连接成功！`, 'success')
+      // emits('msg', `Aria2连接成功！`, 'success')
     } else {
       connectionState.value = 'disconnected'
       emits('msg', 'Aria2连接失败，请检查配置', 'error')
@@ -237,6 +240,16 @@ onMounted(() => {
 .test-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 3001;
 }
 
 .dialog {
