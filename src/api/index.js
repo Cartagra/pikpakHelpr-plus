@@ -91,8 +91,20 @@ function getHeader(){
 }
 
 export function getList(parent_id){
-  let url = `https://api-drive.mypikpak.com/drive/v1/files?thumbnail_size=SIZE_MEDIUM&limit=500&parent_id=${parent_id}&with_audit=true&filters=%7B%22phase%22%3A%7B%22eq%22%3A%22PHASE_TYPE_COMPLETE%22%7D%2C%22trashed%22%3A%7B%22eq%22%3Afalse%7D%7D`
-  return postData(url,{},getHeader())
+  let url;
+  if (parent_id === "recent") {
+      url = `https://api-drive.mypikpak.com/drive/v1/events?thumbnail_size=SIZE_MEDIUM&limit=100`;
+  } else {
+      url = `https://api-drive.mypikpak.com/drive/v1/files?thumbnail_size=SIZE_MEDIUM&limit=500&parent_id=${parent_id}&with_audit=true&filters=%7B%22phase%22%3A%7B%22eq%22%3A%22PHASE_TYPE_COMPLETE%22%7D%2C%22trashed%22%3A%7B%22eq%22%3Afalse%7D%7D`;
+  }
+  const result = await postData(url, {}, getHeader());
+  if (parent_id === "recent") {
+      return {
+          files: (result.events || []).map(event => event.reference_resource).filter(Boolean)
+      };
+  } else {
+      return result;
+  }
 }
 
 // 获取下载地址
