@@ -1,50 +1,53 @@
 <template>
-  <div style="width: 60%" v-if="show" class="dialog">
-    <h2>请勾选你要下载的</h2>
-    <div class="close" @click="close">×</div>
-    <div class="toolbar">
-      <label for="checkbox">
-        <input @change="onCheckAll" type="checkbox" id="checkbox" v-model="checkedAll">
-        全选
-      </label>
-      <div class="sort-options">
-        <label for="sort-by">排序方式:</label>
-        <select id="sort-by" v-model="sortBy" @change="sortList">
-          <option value="name">名称</option>
-          <option value="created_time">创建时间</option>
-          <option value="modified_time">修改时间</option>
-          <option value="size">大小</option>
-          <option value="file_category">文件类型</option>
-        </select>
-        <select id="sort-direction" v-model="sortDirection" @change="sortList">
-          <option value="asc">升序</option>
-          <option value="desc">降序</option>
-        </select>
+  <div v-if="show">
+    <div class="dialog-overlay" @click="close"></div>
+    <div style="width: 60%" class="dialog">
+      <h2>请勾选你要下载的</h2>
+      <div class="close" @click="close">×</div>
+      <div class="toolbar">
+        <label for="checkbox">
+          <input @change="onCheckAll" type="checkbox" id="checkbox" v-model="checkedAll">
+          全选
+        </label>
+        <div class="sort-options">
+          <label for="sort-by">排序方式:</label>
+          <select id="sort-by" v-model="sortBy" @change="sortList">
+            <option value="name">名称</option>
+            <option value="created_time">创建时间</option>
+            <option value="modified_time">修改时间</option>
+            <option value="size">大小</option>
+            <option value="file_category">文件类型</option>
+          </select>
+          <select id="sort-direction" v-model="sortDirection" @change="sortList">
+            <option value="asc">升序</option>
+            <option value="desc">降序</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <ul class="movies">
-      <li v-for="(item, index) in list" :key="item.id">
-        <input @change="onCheck" type="checkbox" :id="item.id" :value="index" v-model="selected">
-        <span class="icon">{{ item.type === 'drive#folder' ? '📁' : '📄' }}</span>
-        <span>{{ item.name }}</span>
-        <span class="file-info">{{ formatFileInfo(item) }}</span>
-      </li>
-    </ul>
-    
-    <!-- aria2连接状态显示 -->
-    <div class="connection-status">
-      <div class="status-indicator">
-        <div class="status-dot" :class="connectionStatus.class"></div>
-        <span class="status-text">{{ connectionStatus.text }}</span>
+      <ul class="movies">
+        <li v-for="(item, index) in list" :key="item.id">
+          <input @change="onCheck" type="checkbox" :id="item.id" :value="index" v-model="selected">
+          <span class="icon">{{ item.type === 'drive#folder' ? '📁' : '📄' }}</span>
+          <span class="file-name">{{ item.name }}</span>
+          <span class="file-info">{{ formatFileInfo(item) }}</span>
+        </li>
+      </ul>
+      
+      <!-- aria2连接状态显示 -->
+      <div class="connection-status">
+        <div class="status-indicator">
+          <div class="status-dot" :class="connectionStatus.class"></div>
+          <span class="status-text">{{ connectionStatus.text }}</span>
+        </div>
+        <button class="test-btn" @click="testConnection" :disabled="isTestingConnection">
+          {{ isTestingConnection ? '测试中...' : '测试连接' }}
+        </button>
       </div>
-      <button class="test-btn" @click="testConnection" :disabled="isTestingConnection">
-        {{ isTestingConnection ? '测试中...' : '测试连接' }}
-      </button>
-    </div>
-    
-    <div class="footer">
-      <div class="btn el-button el-button--secondary" @click="openConfig">配置aria2</div>
-      <div class="btn el-button el-button--primary" @click="pushBefore">推送到aria2</div>
+      
+      <div class="footer">
+        <div class="btn el-button el-button--secondary" @click="openConfig">配置aria2</div>
+        <div class="btn el-button el-button--primary" @click="pushBefore">推送到aria2</div>
+      </div>
     </div>
   </div>
 </template>
@@ -149,7 +152,7 @@ const testConnection = async () => {
     const response = await pushToAria(host, payload)
     if (response && response.result) {
       connectionState.value = 'connected'
-      emits('msg', 'Aria2连接测试成功', 'success')
+      // emits('msg', 'Aria2连接测试成功', 'success')
     } else {
       connectionState.value = 'disconnected'
       emits('msg', 'Aria2连接失败，请检查配置', 'error')
@@ -413,6 +416,16 @@ const push = async () => {
 </script>
 
 <style scoped>
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 3000;
+}
+
 /* 现代化对话框样式 */
 .dialog {
   position: fixed;
@@ -610,6 +623,7 @@ const push = async () => {
   /* height: 400px; */
 
   overflow-y: auto;
+  overflow-x: hidden; /* 防止出现横向滚动条 */
   border: 2px solid #f1f5f9;
   border-radius: 16px;
   padding: 0;
@@ -653,6 +667,8 @@ const push = async () => {
   color: #334155;
   transition: all 0.2s ease;
   cursor: pointer;
+  margin-right: -4px; /* 预留移动空间 */
+  overflow: hidden; /* 防止子元素溢出 */
 }
 
 .movies li:hover {
@@ -662,6 +678,7 @@ const push = async () => {
     rgba(168, 85, 247, 0.05) 100%
   );
   transform: translateX(4px);
+  margin-right: 0; /* hover 时恢复正常边距 */
 }
 
 .movies li:last-child {
@@ -680,6 +697,13 @@ const push = async () => {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
+.movies li .file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+}
+
 .movies li .file-info {
   margin-left: auto;
   color: #64748b;
@@ -689,6 +713,10 @@ const push = async () => {
   background: rgba(248, 250, 252, 0.8);
   border-radius: 6px;
   border: 1px solid rgba(226, 232, 240, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 30%;
 }
 
 /* 底部操作区 */
